@@ -8,7 +8,7 @@
   <div class="hero__content hero__content--plague">
     <h1 class="hero__title hero__title--plague">
       Can you survive<br />
-      <span class="hero__title-accent">1665</span>?
+      <span class="hero__title-accent">the plague</span>?
     </h1>
   </div>
 </section>
@@ -34,33 +34,37 @@
   {{ partial "orn-rule.html" (dict "label" "Inside the Game" "site" .Site) }}
 
   <div class="pillars" role="list">
+
     <div class="pillar" role="listitem">
       <div class="pillar__accent" aria-hidden="true"></div>
-      <h2 class="pillar__title">Reputation</h2>
-      <p class="pillar__desc">Of good credit and quality — or reduced to begging the parish?</p>
+      <h2 class="pillar__title">Household</h2>
+      <p class="pillar__desc">You decisions don't just affect you, but everyone you live with.</p>
     </div>
     <div class="pillar pillar--alt" role="listitem">
       <div class="pillar__accent" aria-hidden="true"></div>
-      <h2 class="pillar__title">Household</h2>
-      <p class="pillar__desc">Family, servants, and lodgers. Each soul is an obligation.</p>
+      <h2 class="pillar__title">Reputation</h2>
+      <p class="pillar__desc">Will your actions prove you to be a worthy soul or a base rogue?</p>
     </div>
     <div class="pillar" role="listitem">
       <div class="pillar__accent" aria-hidden="true"></div>
-      <h2 class="pillar__title">Apothecary</h2>
-      <p class="pillar__desc">Plague waters and posies. The bills are real even if the cures aren't.</p>
+      <h2 class="pillar__title">Wealth</h2>
+      <p class="pillar__desc">There are ways to prevent the plague... if you can find and afford them.</p>
     </div>
+
   </div>
 
   {{/* ── Runaways image block ── */}}
   <div class="period-block">
     <div class="hist-img" style="height: 300px;">
       <img src="{{ "images/runaways-fleeing.jpg" | relURL }}"
-           alt="Runaways fleeing from the plague, English popular print"
+           alt="woodcut of people fleeing skeletons entitled 'Runaways fleeing from the plague'"
            style="height: 300px;" />
     </div>
     <div class="period-block__caption-bar">
-      <p class="period-block__title">"Runaways fleeing from the Plague"</p>
-      <p class="period-block__source">English popular print · Wellcome Collection</p>
+<!-- 
+    <p class="period-block__title">"Runaways fleeing from the Plague"</p>
+ -->
+      <p class="period-block__source">Runaways fleeing from the plague, 1630, printed by H. Gosson and sold by E. Wright</p>
     </div>
   </div>
 

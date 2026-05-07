@@ -1,6 +1,6 @@
 ---
-title: "Can you survive 1665?"
-description: "A Twine text adventure set in plague-year London. Navigate reputation, household, and dwindling resources as the Bills of Mortality mount."
+title: "Can you survive the plague?"
+description: "An educational text-based game set in 1665-6 London."
 ---
 
-The year is 1664. Charles II has been on the throne for four years. London is crowded, ambitious, and — though no one yet knows it — about to lose roughly a quarter of its population. Your reputation, household, and disposable income are all you have to navigate what's coming.
+On Christmas Eve, 1664, Londoners see a comet in the sky and wonder if it is a sign of things to come. A year later, almost a quarter of them will be dead. In this game, you and your household must navigate the perils of war, disease, and fire in Restoration London. Will you survive with your family, reputation, and finances intact?

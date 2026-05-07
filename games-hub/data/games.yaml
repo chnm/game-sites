@@ -1,9 +1,9 @@
 - title:       "Adventures in Illuminating"
-  subtitle:    "France · 13th Century · MS / HS / Undergrad"
+  subtitle:    "France · 13th Century · HS / Undergrad"
   description: "Learn about medieval book production. Can you create an illuminated Book of Hours on time and in budget for your noble patron?"
   url:         "https://jmotis.github.io/Adventures-in-Illuminating.html"
   image:       "adventures-in-illuminating.png"
-  image_alt:   "Adventures in Illuminating — open illuminated manuscript depicting an Annunciation scene"
+  image_alt:   "open illuminated manuscript depicting an Annunciation scene"
   cover:       true
 
 - title:       "Gaming the Great Plague"
@@ -13,6 +13,6 @@
   # TODO: swap to https://1665plague.rrchnm.org/pedagogical-materials/ at production deploy
   teachers_url:  "https://jmotis.github.io/game-sites/plague/pedagogical-materials/"
   image:         "gaming-the-great-plague.jpg"
-  image_alt:     "Gaming the Great Plague — woodcut-style illustration of a skeleton with arrows standing astride three coffins"
+  image_alt:     "woodcut-style illustration of a skeleton with arrows standing astride three coffins"
   cover:         true
   featured:      true
