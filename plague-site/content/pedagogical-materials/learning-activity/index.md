@@ -3,6 +3,7 @@ title: "Learning Activity"
 description: "Examine 1660s English plague remedies through primary source analysis."
 weight: 2
 meta: "Activity · 90 min · Grades 6&ndash;9"
+pdf: "LearningActivity.pdf"
 ---
 
 ## Introduction
