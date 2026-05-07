@@ -11,6 +11,12 @@
     {{- if $lessons }}
     <div class="lessons" role="list">
       {{- range $i, $lesson := $lessons }}
+      {{- $href := .RelPermalink -}}
+      {{- with .Params.pdf -}}
+        {{- with $lesson.Resources.GetMatch . -}}
+          {{- $href = .RelPermalink -}}
+        {{- end -}}
+      {{- end }}
       <div class="lesson{{ if eq (mod $i 2) 1 }} lesson--alt{{ end }}" role="listitem">
         <div>
           <h2 class="lesson__title">{{ .Title }}</h2>
@@ -19,7 +25,7 @@
         {{- with .Params.meta }}
         <p class="lesson__meta">{{ . | safeHTML }}</p>
         {{- end }}
-        <a href="{{ .RelPermalink }}" class="btn btn--download">View &rarr;</a>
+        <a href="{{ $href }}" class="btn btn--download">View &rarr;</a>
       </div>
       {{- end }}
     </div>
