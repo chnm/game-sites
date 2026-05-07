@@ -2,7 +2,7 @@
 title: "Student Organizer Worksheet"
 description: "Track your character, decisions, and outcomes for each playthrough of the game."
 weight: 1
-meta: "Worksheet · PDF available"
+meta: "Worksheet"
 pdf: "PlagueGameOrganizer-Worksheet.pdf"
 ---
 
