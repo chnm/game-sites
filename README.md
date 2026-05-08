@@ -64,7 +64,7 @@ Output goes to each site's `public/` (gitignored). The GitHub Actions workflow d
 
 ```
 .
-├── themes/rrchnm/                  Shared theme (used by all three sites)
+├── themes/rrchnm/                  Shared theme (used by all four sites)
 │   ├── theme.toml
 │   ├── layouts/
 │   │   ├── _default/
@@ -242,7 +242,7 @@ To add a lesson:
 ```
 plague-site/content/pedagogical-materials/your-new-lesson/
 ├── index.md
-└── your-new-lesson.pdf      # optional — surfaced as a Download PDF button
+└── your-new-lesson.pdf      # opened directly by the list's "View" button
 ```
 
 `index.md` front matter:
@@ -252,11 +252,13 @@ plague-site/content/pedagogical-materials/your-new-lesson/
 title: "Lesson Title"
 description: "One-sentence subtitle, shown on the list and as a page intro."
 weight: 4                              # ordering on the index page
-meta: "Worksheet · PDF available"      # small label on the index row
-pdf: "your-new-lesson.pdf"             # optional — bundle-relative filename
+meta: "Worksheet"                      # small label on the index row
+pdf: "your-new-lesson.pdf"             # bundle-relative filename
 ---
 
-Markdown body, including any inline images.
+Markdown body, including any inline images. (Currently only rendered if a
+visitor navigates to the lesson's detail URL directly — the index links
+straight to the PDF.)
 ```
 
 Inline images that live next to `index.md` use the `bundleimg` shortcode (errors loudly if the file isn't found — catches typos at build time):
@@ -265,7 +267,7 @@ Inline images that live next to `index.md` use the `bundleimg` shortcode (errors
 {{< bundleimg src="diagram.png" alt="…" >}}
 ```
 
-The lesson appears automatically on `/pedagogical-materials/` (sorted by `weight`) with the meta label and a `View →` button to its detail page.
+The lesson appears automatically on `/pedagogical-materials/` (sorted by `weight`) with the meta label and a `View →` button. When `pdf:` is set, that button links straight to the bundled PDF, so visitors land in the browser's built-in PDF viewer (with its native download control); when `pdf:` is omitted the button falls back to the lesson's detail page.
 
 ### Update the navigation menu
 
@@ -354,7 +356,7 @@ Per-site overrides come from `themes/rrchnm/layouts/partials/head.html`, which i
 
 Sections that have detail pages with co-located assets (currently: plague's `pedagogical-materials/`) use Hugo **page bundles** — a folder with `index.md` plus any PDFs / images. Pros: lifecycle is unified (delete the page, its assets go with it); URLs are semantic (`/pedagogical-materials/glossary/glossary.pdf`); Hugo's `.Resources.GetMatch` resolves bundle-relative paths under any baseURL.
 
-The shared theme's `pedagogical-materials/single.html` reads an optional `pdf:` front-matter value via `.Resources.GetMatch` and renders a Download PDF button when found.
+The shared theme's `pedagogical-materials/list.html` reads each lesson's optional `pdf:` front-matter value via `.Resources.GetMatch`; when present, the `View →` button links directly to the bundled PDF (browser-native viewer, native download control). The fallback `pedagogical-materials/single.html` still exists for lessons without a PDF and renders a Download PDF button when one is attached.
 
 ### Shortcodes
 
