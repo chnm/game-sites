@@ -1,19 +1,8 @@
 {{ define "main" }}
-{{- $sections := .Site.Data.about_sections -}}
-
 <div class="page-body">
   <div class="about-inner">
     <h1 class="page-title">{{ .Title }}</h1>
-    {{- with .Content }}
-    <p class="page-intro">{{ . | plainify }}</p>
-    {{- end }}
-
-    {{- range $sections }}
-    <div class="about-section">
-      <h2 class="about-section__label">{{ .label }}</h2>
-      <div class="about-section__body">{{ .body | safeHTML }}</div>
-    </div>
-    {{- end }}
+    {{ .Content }}
   </div>
 </div>
 {{ end }}

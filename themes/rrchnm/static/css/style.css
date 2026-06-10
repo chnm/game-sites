@@ -723,6 +723,39 @@ body {
   text-decoration-thickness: 1px;
 }
 
+/* About page — markdown content (h2, p, a, ul) scoped to .about-inner */
+.about-inner h2 {
+  font-family: var(--sans);
+  font-size: 18px;
+  color: var(--primary);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--dark-bg);
+  margin-bottom: 12px;
+}
+
+.about-inner p,
+.about-inner ul {
+  font-size: 18px;
+  line-height: 1.65;
+  font-family: var(--body);
+}
+
+.about-inner ul {
+  list-style: none;
+  padding: 0;
+}
+
+.about-inner a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
 /* ============================================================
    BIBLIOGRAPHY PAGE
    ============================================================ */
@@ -1192,6 +1225,10 @@ body {
   .about-section { margin-top: 32px; padding-top: 24px; }
   .about-section__label { font-size: 16px; }
   .about-section__body { font-size: 16px; }
+
+  .about-inner h2 { margin-top: 32px; padding-top: 24px; font-size: 16px; }
+  .about-inner p,
+  .about-inner ul { font-size: 16px; }
 
   .orn-rule { font-size: 16px; }
 
