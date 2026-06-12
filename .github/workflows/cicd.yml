@@ -213,6 +213,29 @@ jobs:
       needs.build-release.result == 'success'
     runs-on: ubuntu-latest
     steps:
+      - name: Format released site list
+        id: fmt
+        env:
+          MATRIX: ${{ needs.changes.outputs.matrix }}
+          REF: ${{ github.ref }}
+        run: |
+          # main -> prod FQDN; anything else (preview) -> dev FQDN. Render one
+          # aligned "<key> -> <fqdn>" line per site instead of dumping the raw
+          # catalog JSON. MATRIX comes in via env so its quotes/braces don't
+          # need shell-escaping.
+          if [ "$REF" = "refs/heads/main" ]; then
+            FQDN_KEY=prod_fqdn; TIER=production
+          else
+            FQDN_KEY=devl_fqdn; TIER=development
+          fi
+          {
+            echo "tier=$TIER"
+            echo "sites<<SITES_EOF"
+            echo "$MATRIX" | jq -r --arg k "$FQDN_KEY" \
+              '.[] | "  \(.key)\(" " * (18 - (.key|length))) -> \(.[$k])"'
+            echo "SITES_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - uses: rtCamp/action-slack-notify@v2.2.0
         env:
           MSG_MINIMAL: true
@@ -224,8 +247,8 @@ jobs:
             ref: ${{ github.ref }}
             commit (${{ github.sha }}): ${{ github.event.commits[0].message }}
 
-            released sites:
-            ${{ needs.changes.outputs.matrix }}
+            released sites (${{ steps.fmt.outputs.tier }}):
+            ${{ steps.fmt.outputs.sites }}
             ```
             View details at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SLACK_USERNAME: rrchnm-systems
@@ -240,6 +263,25 @@ jobs:
       needs.build-release.result != 'success'
     runs-on: ubuntu-latest
     steps:
+      - name: Format attempted site list
+        id: fmt
+        env:
+          MATRIX: ${{ needs.changes.outputs.matrix }}
+          REF: ${{ github.ref }}
+        run: |
+          if [ "$REF" = "refs/heads/main" ]; then
+            FQDN_KEY=prod_fqdn; TIER=production
+          else
+            FQDN_KEY=devl_fqdn; TIER=development
+          fi
+          {
+            echo "tier=$TIER"
+            echo "sites<<SITES_EOF"
+            echo "$MATRIX" | jq -r --arg k "$FQDN_KEY" \
+              '.[] | "  \(.key)\(" " * (18 - (.key|length))) -> \(.[$k])"'
+            echo "SITES_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - uses: rtCamp/action-slack-notify@v2.2.0
         env:
           MSG_MINIMAL: true
@@ -251,8 +293,8 @@ jobs:
             ref: ${{ github.ref }}
             commit (${{ github.sha }}): ${{ github.event.commits[0].message }}
 
-            attempted sites:
-            ${{ needs.changes.outputs.matrix }}
+            attempted sites (${{ steps.fmt.outputs.tier }}):
+            ${{ steps.fmt.outputs.sites }}
             ```
             View details at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SLACK_USERNAME: rrchnm-systems
