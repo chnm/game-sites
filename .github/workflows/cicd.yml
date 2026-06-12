@@ -1,0 +1,197 @@
+name: game-sites CI/CD (build, release, deploy)
+
+# Monorepo pipeline for the four Hugo sites in this repo. The single-site
+# reusable workflows (hugo--build-release-deploy.yml) don't fit a monorepo —
+# they build ONE Docker image / ONE baseURL / ONE release / ONE FQDN. So we
+# build + release each changed site here with the Hugo CLI (no Dockerfile
+# needed; themesDir="../themes" resolves naturally with --source <site>), then
+# reuse the deploy-only hugo--deploy.yml once per changed site.
+#
+# Flow:
+#   changes       -> path-filter which sites changed (themes/** => all)
+#   build-release -> matrix: hugo build each changed site, publish a per-site
+#                    ISO-tagged GitHub release with the tarball
+#   deploy        -> matrix: call chnm/.github hugo--deploy.yml per site; the
+#                    ansible playbook fetches that site's release by target_fqdn
+#
+# Tiers: push to main -> prod FQDNs; push to preview -> *.dev.chnm.gmu.edu.
+#
+# The ansible hugo-sites.yaml catalog resolves each FQDN's artifact by
+# release.tag_prefix + release.asset (latest release whose tag starts with
+# tag_prefix, then download the named asset). This workflow emits, per site:
+#   tag    = "<key>-<tier>-<ts>"   e.g. games-hub-prod-20260611_141500
+#   asset  = "<key>.tar.gz"        e.g. games-hub.tar.gz
+# so each catalog entry uses tag_prefix "<key>-<tier>-" + asset "<key>.tar.gz".
+# Tier is explicit in the prefix so a prod entry's tag_prefix never also
+# matches dev tags. 8 catalog entries: 4 sites x 2 tiers (see PR / docs).
+
+on:
+  push:
+    branches: [main, preview]
+  workflow_dispatch:
+    inputs:
+      sites:
+        description: 'Comma-separated site keys to force-build (games-hub,plague-site,shipping-site,illuminated-site) or "all"'
+        required: false
+        default: 'all'
+
+# Serialize per-branch so overlapping pushes don't race on release tags /
+# deploys. Don't cancel an in-flight deploy.
+concurrency:
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+
+  ###############################################################
+  ###   CHANGE DETECTION  (which sites need rebuilding?)      ###
+  ###############################################################
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+      any: ${{ steps.select.outputs.any }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          # Filter names match the site keys so `outputs.changes` (a JSON array
+          # of matched names) maps straight onto the catalog in select_sites.py.
+          filters: |
+            themes: ['themes/**']
+            games-hub: ['games-hub/**']
+            plague-site: ['plague-site/**']
+            shipping-site: ['shipping-site/**']
+            illuminated-site: ['illuminated-site/**']
+
+      # Catalog + selection rules live in .github/scripts/select_sites.py.
+      - id: select
+        name: Select sites to build
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_SITES: ${{ github.event.inputs.sites }}
+          CHANGED: ${{ steps.filter.outputs.changes }}
+        run: python3 .github/scripts/select_sites.py
+
+  ###############################################################
+  ###   BUILD + RELEASE  (one tarball + release per site)    ###
+  ###############################################################
+  build-release:
+    needs: changes
+    if: needs.changes.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # create tags + releases
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ fromJSON(needs.changes.outputs.matrix) }}
+    env:
+      HUGO_VERSION: "0.140.2"
+    steps:
+      - name: Install Hugo (extended)
+        run: |
+          wget -O "${RUNNER_TEMP}/hugo.deb" \
+            "https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb"
+          sudo dpkg -i "${RUNNER_TEMP}/hugo.deb"
+
+      - uses: actions/checkout@v4
+
+      - name: Resolve tier (FQDN / baseURL / release tag prefix)
+        id: tier
+        run: |
+          set -euo pipefail
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            FQDN="${{ matrix.site.prod_fqdn }}"
+            ENVNAME="production"
+            TIER="prod"
+          else
+            FQDN="${{ matrix.site.devl_fqdn }}"
+            ENVNAME="development"
+            TIER="dev"
+          fi
+          # Release tag prefix the ansible hugo-sites.yaml catalog matches on
+          # (release.tag_prefix). Tier is explicit so a prod entry's prefix
+          # never also matches dev tags, and vice-versa.
+          PREFIX="${{ matrix.site.key }}-${TIER}-"
+          {
+            echo "fqdn=${FQDN}"
+            echo "baseurl=https://${FQDN}/"
+            echo "envname=${ENVNAME}"
+            echo "tier=${TIER}"
+            echo "prefix=${PREFIX}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build ${{ matrix.site.key }}
+        run: |
+          hugo --gc --minify \
+            --source "${{ matrix.site.source }}" \
+            --destination "${{ github.workspace }}/public/${{ matrix.site.key }}" \
+            --environment "${{ steps.tier.outputs.envname }}" \
+            --baseURL "${{ steps.tier.outputs.baseurl }}"
+
+      - name: Archive build artifact
+        run: |
+          tar czvf "${{ matrix.site.key }}.tar.gz" \
+            -C "${{ github.workspace }}/public/${{ matrix.site.key }}" .
+
+      - id: ts
+        name: Get ISO build timestamps
+        run: |
+          {
+            echo "name=$(TZ=America/New_York date +'%Y-%m-%dT%H:%M:%S%z')"
+            echo "tag=$(TZ=America/New_York date +'%Y%m%d_%H%M%S')"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Generate RELEASE.md
+        run: |
+          {
+            echo '`github` context:'
+            echo '```'
+            echo "site: ${{ matrix.site.key }}"
+            echo "tier: ${{ steps.tier.outputs.envname }}"
+            echo "fqdn: ${{ steps.tier.outputs.fqdn }}"
+            echo "baseURL: ${{ steps.tier.outputs.baseurl }}"
+            echo "run_id: ${{ github.run_id }}"
+            echo "workflow_ref: ${{ github.workflow_ref }}"
+            echo "repository: ${{ github.repository }}"
+            echo "ref_name: ${{ github.ref_name }}"
+            echo "ref: ${{ github.ref }}"
+            echo "sha: ${{ github.sha }}"
+            echo '```'
+          } > RELEASE.md
+
+      - name: Create release and upload tarball
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # tag        e.g. games-hub-prod-20260611_141500   (prefix ends in "-")
+          # asset name e.g. games-hub.tar.gz
+          # -> catalog: release.tag_prefix "games-hub-prod-", release.asset "games-hub.tar.gz"
+          tag_name: "${{ steps.tier.outputs.prefix }}${{ steps.ts.outputs.tag }}"
+          name: "${{ matrix.site.key }} (${{ steps.tier.outputs.tier }}) ${{ steps.ts.outputs.name }}"
+          body_path: ./RELEASE.md
+          files: "./${{ matrix.site.key }}.tar.gz"
+
+  ###############################################################
+  ###   DEPLOY  (reuse hugo--deploy.yml once per site)       ###
+  ###############################################################
+  deploy:
+    needs: [changes, build-release]
+    if: >
+      always() && !cancelled() &&
+      needs.build-release.result == 'success' &&
+      needs.changes.outputs.any == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ fromJSON(needs.changes.outputs.matrix) }}
+    uses: chnm/.github/.github/workflows/hugo--deploy.yml@main
+    with:
+      website-devl-fqdn: ${{ matrix.site.devl_fqdn }}
+      website-prod-fqdn: ${{ matrix.site.prod_fqdn }}
+      runner_labels: '["self-hosted","IncusOS"]'
+    secrets: inherit
