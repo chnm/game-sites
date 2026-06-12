@@ -195,3 +195,65 @@ jobs:
       website-prod-fqdn: ${{ matrix.site.prod_fqdn }}
       runner_labels: '["self-hosted","IncusOS"]'
     secrets: inherit
+
+  ###############################################################
+  ###   NOTIFY  (one Slack summary per run, success/failure) ###
+  ###############################################################
+  # The per-site deploy notifications come from the reusable hugo--deploy.yml
+  # (deploy-notify, on failure). These two cover the release step, which runs
+  # inline above and so has no notification of its own. build-release is a
+  # matrix, so we source the site list from the already-aggregated `changes`
+  # job rather than from matrix outputs (which would overwrite each other).
+  notify-release:
+    name: Release Notification
+    needs: [changes, build-release]
+    if: >
+      always() && !cancelled() &&
+      needs.changes.outputs.any == 'true' &&
+      needs.build-release.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          MSG_MINIMAL: true
+          SLACK_COLOR: '#fab005'
+          SLACK_TITLE: 'Sites Released :rocket: - `${{ github.repository }}`'
+          SLACK_MESSAGE: |
+            ```
+            event_name: ${{ github.event_name }}
+            ref: ${{ github.ref }}
+            commit (${{ github.sha }}): ${{ github.event.commits[0].message }}
+
+            released sites:
+            ${{ needs.changes.outputs.matrix }}
+            ```
+            View details at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_USERNAME: rrchnm-systems
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_SYSTEMS }}
+
+  notify-release-failure:
+    name: Release Failure Notification
+    needs: [changes, build-release]
+    if: >
+      always() && !cancelled() &&
+      needs.changes.outputs.any == 'true' &&
+      needs.build-release.result != 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          MSG_MINIMAL: true
+          SLACK_COLOR: '#c32a26'
+          SLACK_TITLE: 'Release Build Failed :x: - `${{ github.repository }}`'
+          SLACK_MESSAGE: |
+            ```
+            event_name: ${{ github.event_name }}
+            ref: ${{ github.ref }}
+            commit (${{ github.sha }}): ${{ github.event.commits[0].message }}
+
+            attempted sites:
+            ${{ needs.changes.outputs.matrix }}
+            ```
+            View details at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_USERNAME: rrchnm-systems
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_SYSTEMS }}
