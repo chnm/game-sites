@@ -1,9 +1,11 @@
 {{- /*
   Matomo analytics.
 
-  Renders nothing unless the site sets params.matomoSiteId, so sites that
-  don't yet have a tracking ID emit no script at all. Each site supplies its
-  own numeric Matomo site ID:
+  Only renders for production builds (hugo.IsProduction) AND when the site
+  sets params.matomoSiteId. CI builds main with --environment production and
+  dev branches with --environment development, so dev/preview deploys emit no
+  tracker and only the live *.rrchnm.org sites report to Matomo. Sites without
+  a configured ID also emit nothing. Each site supplies its own numeric ID:
 
     [params]
       matomoSiteId = 127
@@ -11,6 +13,7 @@
   The tracker URL defaults to RRCHNM's shared Matomo instance and can be
   overridden per-site with params.matomoUrl (must end in a trailing slash).
 */ -}}
+{{- if hugo.IsProduction -}}
 {{- with .Site.Params.matomoSiteId -}}
 {{- $url := $.Site.Params.matomoUrl | default "https://stats.rrchnm.org/" -}}
 <!-- Matomo -->
@@ -28,4 +31,5 @@
   })();
 </script>
 <!-- End Matomo Code -->
+{{- end -}}
 {{- end -}}
