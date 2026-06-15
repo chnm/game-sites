@@ -73,6 +73,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           DISPATCH_SITES: ${{ github.event.inputs.sites }}
           CHANGED: ${{ steps.filter.outputs.changes }}
+          REF: ${{ github.ref }}
         run: python3 .github/scripts/select_sites.py
 
   ###############################################################
