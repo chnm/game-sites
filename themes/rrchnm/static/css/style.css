@@ -1064,8 +1064,16 @@ body {
 
 .site-footer__logo {
   display: block;
-  height: 44px;
+  height: 80px;          /* matches the GMU logo on rrchnm.org's footer (Tailwind h-20) */
   width: auto;
+  max-width: 100%;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.site-footer__logo-link:hover .site-footer__logo,
+.site-footer__logo-link:focus-visible .site-footer__logo {
+  opacity: 1;
 }
 
 /* ============================================================
