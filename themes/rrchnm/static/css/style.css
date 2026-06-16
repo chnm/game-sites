@@ -1050,6 +1050,32 @@ body {
   align-items: center;
 }
 
+.site-footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.site-footer__logo-link {
+  display: inline-block;
+  line-height: 0;
+}
+
+.site-footer__logo {
+  display: block;
+  height: 80px;          /* matches the GMU logo on rrchnm.org's footer (Tailwind h-20) */
+  width: auto;
+  max-width: 100%;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.site-footer__logo-link:hover .site-footer__logo,
+.site-footer__logo-link:focus-visible .site-footer__logo {
+  opacity: 1;
+}
+
 /* ============================================================
    RESPONSIVE — TABLET (≤ 960px)
    ============================================================ */
@@ -1247,6 +1273,9 @@ body {
     text-align: center;
     padding-top: 20px;
     padding-bottom: 20px;
+  }
+  .site-footer__brand {
+    align-items: center;
   }
 }
 

@@ -12,18 +12,42 @@ Selection rules:
     push, themes/**    -> every site (shared theme affects all)
     push, otherwise    -> only the sites whose own dir changed
 
+On the prod tier (push to main, detected via REF), any selected site whose
+catalog entry has prod_ready=False is dropped before the matrix is emitted, so
+a site can keep shipping to *.dev.chnm.gmu.edu while it's still being readied
+for production. Dev/preview builds are never filtered. This holds even for a
+themes/** change or a workflow_dispatch sites=all run -- prod_ready is the one
+switch that lets a site reach production.
+
 The hugo --source dir == key; the build job derives the release tag prefix
 ("<key>-<tier>-") and baseURL from the selected tier/FQDN.
 """
 import json
 import os
 
-# key -> (prod_fqdn, dev_fqdn)
+# Per-site catalog. prod_ready gates the prod tier only: set it False to keep a
+# site on dev until it's cleared for production (see Selection rules above).
 SITES = {
-    "games-hub":        ("games.rrchnm.org",       "games.dev.chnm.gmu.edu"),
-    "plague-site":      ("1665plague.rrchnm.org",   "1665plague.dev.chnm.gmu.edu"),
-    "shipping-site":    ("1812shipping.rrchnm.org", "1812shipping.dev.chnm.gmu.edu"),
-    "illuminated-site": ("illuminated.rrchnm.org",  "illuminated.dev.chnm.gmu.edu"),
+    "games-hub": {
+        "prod_fqdn":  "games.rrchnm.org",
+        "devl_fqdn":  "games.dev.chnm.gmu.edu",
+        "prod_ready": False,
+    },
+    "plague-site": {
+        "prod_fqdn":  "1665plague.rrchnm.org",
+        "devl_fqdn":  "1665plague.dev.chnm.gmu.edu",
+        "prod_ready": False,
+    },
+    "shipping-site": {
+        "prod_fqdn":  "1812shipping.rrchnm.org",
+        "devl_fqdn":  "1812shipping.dev.chnm.gmu.edu",
+        "prod_ready": False,
+    },
+    "illuminated-site": {
+        "prod_fqdn":  "illuminated.rrchnm.org",
+        "devl_fqdn":  "illuminated.dev.chnm.gmu.edu",
+        "prod_ready": False,
+    },
 }
 
 
@@ -43,10 +67,17 @@ def selected_keys():
 
 def main():
     wanted = set(selected_keys())
+    # Tier is branch-based, mirroring the build-release / deploy jobs: main -> prod.
+    is_prod = os.environ.get("REF") == "refs/heads/main"
     matrix = [
-        {"key": key, "source": key, "prod_fqdn": prod, "devl_fqdn": dev}
-        for key, (prod, dev) in SITES.items()
-        if key in wanted
+        {
+            "key": key,
+            "source": key,
+            "prod_fqdn": cfg["prod_fqdn"],
+            "devl_fqdn": cfg["devl_fqdn"],
+        }
+        for key, cfg in SITES.items()
+        if key in wanted and (cfg["prod_ready"] or not is_prod)
     ]
 
     # $GITHUB_OUTPUT is the current (post-`::set-output::`) env-file API and is
