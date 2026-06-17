@@ -31,12 +31,12 @@ SITES = {
     "games-hub": {
         "prod_fqdn":  "games.rrchnm.org",
         "devl_fqdn":  "games.dev.chnm.gmu.edu",
-        "prod_ready": False,
+        "prod_ready": True,
     },
     "plague-site": {
         "prod_fqdn":  "1665plague.rrchnm.org",
         "devl_fqdn":  "1665plague.dev.chnm.gmu.edu",
-        "prod_ready": False,
+        "prod_ready": True,
     },
     "shipping-site": {
         "prod_fqdn":  "1812shipping.rrchnm.org",
