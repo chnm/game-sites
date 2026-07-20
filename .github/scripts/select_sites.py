@@ -41,7 +41,7 @@ SITES = {
     "shipping-site": {
         "prod_fqdn":  "1812shipping.rrchnm.org",
         "devl_fqdn":  "1812shipping.dev.chnm.gmu.edu",
-        "prod_ready": False,
+        "prod_ready": True,
     },
     "illuminated-site": {
         "prod_fqdn":  "illuminated.rrchnm.org",
