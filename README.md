@@ -97,8 +97,7 @@ Output goes to each site's `public/` (gitignored). The GitHub Actions workflow d
 │   ├── data/                       Structured content (YAML)
 │   │   ├── games.yaml              Current games (featured: true → home hero)
 │   │   ├── in_development.yaml     Upcoming games (smaller cards, list page only)
-│   │   ├── bibliography.yaml       Sectioned bibliography (label + entries)
-│   │   └── about_sections.yaml     Project Team / RRCHNM / GMU blocks
+│   │   └── bibliography.yaml       Sectioned bibliography (label + entries)
 │   ├── layouts/                    Hub-only page layouts
 │   │   ├── index.html              Home (hero, drop-cap intro, Featured Game, Quick Facts)
 │   │   ├── games/list.html         Current Games page
@@ -123,8 +122,6 @@ Output goes to each site's `public/` (gitignored). The GitHub Actions workflow d
 │   │       └── glossary/
 │   │           ├── index.md        <dl> of historical terms
 │   │           └── glossary.pdf
-│   ├── data/
-│   │   └── about_sections.yaml     (per-site — sites may diverge over time)
 │   ├── layouts/
 │   │   └── index.html              Home (hero, CTA bar, drop cap, pillars,
 │   │                                closing period image)
@@ -138,8 +135,6 @@ Output goes to each site's `public/` (gitignored). The GitHub Actions workflow d
 │   │   ├── _index.md
 │   │   ├── about/_index.md
 │   │   └── pedagogical-materials/_index.md  (no lesson bundles yet)
-│   ├── data/
-│   │   └── about_sections.yaml
 │   ├── layouts/
 │   │   └── index.html              Home (hero, CTA bar, drop cap, pillars,
 │   │                                closing period image)
@@ -152,8 +147,6 @@ Output goes to each site's `public/` (gitignored). The GitHub Actions workflow d
 │   │   ├── _index.md
 │   │   ├── about/_index.md
 │   │   └── pedagogical-materials/_index.md  (no lesson bundles yet)
-│   ├── data/
-│   │   └── about_sections.yaml
 │   ├── layouts/
 │   │   └── index.html              Home (gradient hero placeholder, CTA bar,
 │   │                                drop cap, pillars; no closing image yet)
@@ -229,9 +222,7 @@ Add or split sections by adding more top-level `- label:` blocks. Entries within
 
 ### Update About sections (per site)
 
-Each site has its own `data/about_sections.yaml` (`games-hub/`, `plague-site/`, `shipping-site/`, `illuminated-site/`). They were originally near-identical but the sites are expected to diverge over time as each game's project team and credits evolve. Edit per site as needed; no automatic sync.
-
-Each section: `label` (eyebrow, becomes an `<h2>`) + `body` (HTML allowed via `safeHTML`).
+Each site has its own `content/about/_index.md` with standard markdown content. The About template (`themes/rrchnm/layouts/about/list.html`) renders the markdown directly. Edit each site's `_index.md` as needed; no automatic sync between sites.
 
 ### Add or edit a pedagogical-materials lesson (plague, future shipping)
 
@@ -308,7 +299,7 @@ Suppose you want a dedicated site for *Adventures in Illuminating* (like `plague
    - `[params].primary` and the related `primaryDark` / `primaryDeep` / `primarySoft` shades. Use brand-palette values; derive AA-compliant variants.
    - **If your `primary` colour fails 3:1 contrast on the dark header surface (`#1F1B16`)**, set `primaryOnDark` to a brand-approved colour that clears 3:1 (the shipping site uses GMU Gold `#FFC733`). Otherwise omit and the nav underline / focus ring will inherit `--primary`.
    - `[[menus.main]]` items → home, game URL, pedagogical-materials, about
-3. **Replace content & data.** Edit each file under `content/` (home prose, about title) and `data/` (about_sections). Keep `data/about_sections.yaml` even if it duplicates a sibling site for now — the sites may diverge.
+3. **Replace content.** Edit each file under `content/` (home prose, `about/_index.md` for About page content).
 4. **Drop in the new site's two images** at `illuminating-site/static/images/`. The standard subsite home uses exactly two images: a full-bleed **hero** at the top and a **closing period image** at the bottom (a `.period-block` with caption bar). Edit `layouts/index.html` to point at your filenames, or rename your files to match. There are no mid-page images on the home page.
 5. **Hook it into the build & landing page:**
    - In `.github/workflows/deploy.yml`, add a Build step modeled on the existing ones:
@@ -530,7 +521,7 @@ Search the codebase for `TODO` to find the live list. Currently:
 
 - `games-hub/data/games.yaml` — Plague `teachers_url` to swap to production at deploy
 - `games-hub/data/games.yaml` — Adventures in Illuminating still needs a `teachers_url` if pedagogy materials exist
-- `games-hub/data/about_sections.yaml`, `plague-site/data/about_sections.yaml`, `shipping-site/data/about_sections.yaml` — RRCHNM blurb has a probable typo: *"the center which as developed"* → likely *"which has developed"*
+- RRCHNM blurb in About pages has a probable typo: *"the center which as developed"* → likely *"which has developed"*
 - Shipping has no real lesson content yet — `content/pedagogical-materials/` has only the section `_index.md`. Add lesson page bundles when materials exist.
 
 ### Things never built (in the original design but unimplemented)

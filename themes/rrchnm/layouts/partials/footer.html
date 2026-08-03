@@ -1,6 +1,11 @@
 <footer class="site-footer">
   <div class="site-footer__inner">
-    <span>© 2020 – {{ now.Year }} RRCHNM</span>
+    <div class="site-footer__brand">
+      <a href="https://historyarthistory.gmu.edu/" class="site-footer__logo-link" target="_blank" rel="noopener">
+        <img src="{{ "images/gmu-logo-light.png" | relURL }}" alt="George Mason University — Department of History and Art History" class="site-footer__logo" />
+      </a>
+      <span>© 2020 – {{ now.Year }} RRCHNM</span>
+    </div>
     <a href="mailto:{{ .Site.Params.contactEmail }}" class="btn btn--contact">
       Contact Us: {{ .Site.Params.contactEmail }}
     </a>

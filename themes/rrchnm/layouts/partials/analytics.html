@@ -1,0 +1,35 @@
+{{- /*
+  Matomo analytics.
+
+  Only renders for production builds (hugo.IsProduction) AND when the site
+  sets params.matomoSiteId. CI builds main with --environment production and
+  dev branches with --environment development, so dev/preview deploys emit no
+  tracker and only the live *.rrchnm.org sites report to Matomo. Sites without
+  a configured ID also emit nothing. Each site supplies its own numeric ID:
+
+    [params]
+      matomoSiteId = 127
+
+  The tracker URL defaults to RRCHNM's shared Matomo instance and can be
+  overridden per-site with params.matomoUrl (must end in a trailing slash).
+*/ -}}
+{{- if hugo.IsProduction -}}
+{{- with .Site.Params.matomoSiteId -}}
+{{- $url := $.Site.Params.matomoUrl | default "https://stats.rrchnm.org/" -}}
+<!-- Matomo -->
+<script>
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="{{ $url }}";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '{{ . }}']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
+{{- end -}}
+{{- end -}}

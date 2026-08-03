@@ -22,6 +22,7 @@ theme         = "rrchnm"
   # focus ring only. Matches the shipping-site approach.
   primaryOnDark = "#FFC733"
   contactEmail = "chnm@gmu.edu"
+  matomoSiteId = 130
 
 [[menus.main]]
   name   = "Home"

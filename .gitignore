@@ -10,3 +10,7 @@ Thumbs.db
 *~
 .idea/
 .vscode/
+
+# Python (CI scripts in .github/scripts/)
+__pycache__/
+*.pyc

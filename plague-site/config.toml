@@ -17,6 +17,7 @@ theme         = "rrchnm"
   primaryDeep  = "#00484A"
   primarySoft  = "#E5F1F1"
   contactEmail = "chnm@gmu.edu"
+  matomoSiteId = 128
 
 [[menus.main]]
   name   = "Home"

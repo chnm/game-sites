@@ -15,6 +15,7 @@ theme         = "rrchnm"
   # navy fails SC 1.4.11 (3:1). Used for nav underline + focus ring only.
   primaryOnDark = "#FFC733"
   contactEmail = "chnm@gmu.edu"
+  matomoSiteId = 129
 
 [[menus.main]]
   name   = "Home"
